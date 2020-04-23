@@ -1,0 +1,80 @@
+/*游戏背景*/
+#wrapBg{
+    background-image: url(../images/bg.jpg);
+    height: 480px;
+    width: 343px;
+    margin: 0 auto;
+    position: relative;
+    top: 100px;
+    overflow: hidden;
+}
+/*头部标题*/
+#headTitle{
+    background-image: url("../images/head.jpg");
+    position: absolute;
+    width: 236px;
+    height: 77px;
+    top: 100px;
+    left: 53px;
+}
+/*开始标题的小鸟*/
+#headBird{
+    float: right;
+    margin-top: 25px;
+}
+/*开始按钮*/
+#startBtn{
+    background-image: url("../images/start.jpg");
+    position: absolute;
+    width: 85px;
+    height: 29px;
+    top: 250px;
+    left: 129px;
+    margin: 0;
+    padding: 0;
+}
+#grassLand1{
+    width: 343px;
+    height: 14px;
+    background-image: url("../images/banner.jpg");
+    position: absolute;
+    top: 423px;
+}
+#grassLand2{
+    width: 343px;
+    height: 14px;
+    background-image: url("../images/banner.jpg");
+    position: absolute;
+    top: 423px;
+    left: 343px;
+}
+#score{
+    position: absolute;
+    left: 130px;
+    top: 50px;
+    z-index: 1;
+}
+#score div{
+    width: 28px;
+    height: 39px;
+    background-image: url("../images/0.jpg");
+    float: left;
+    display: none;
+}
+#gameOver{
+    position: absolute;
+    top: 100px;
+    text-align: center;
+    z-index: 1;
+    display: none;
+}
+/*游戏小鸟的样式*/
+.birdStyle{
+    width: 40px;
+    height: 28px;
+    position: absolute;
+    background: url("../images/bird0.png") no-repeat;
+    top: 200px;
+    left: 50px;/*距离左边的距离是固定的*/
+    z-index: 1;
+}
