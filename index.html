@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PC端FlappyBird游戏</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+<!--整个界面-->
+<div id="wrapBg">
+    <!--头部标题-->
+    <div id="headTitle">
+        <img id="headBird" src="images/bird0.png" alt="小鸟">
+    </div>
+    <!--开始按钮-->
+    <button id="startBtn"></button>
+    <!--底部草坪，有个缓冲动态效果-->
+    <div id="grassLand1"></div>
+    <div id="grassLand2"></div>
+    <!--计分器-->
+    <div id="score">
+        <div id="num1"></div>
+        <div id="num2"></div>
+        <div id="num3"></div>
+    </div>
+    <!--结束界面-->
+    <div id="gameOver">
+        <img src="images/game_over.jpg" alt="game over">
+        <img src="images/message.jpg" alt="message">
+        <img id="ok" src="images/ok.jpg" alt="ok">
+    </div>
+</div>
+</body>
+<script type="text/javascript"></script>
+<script src="js/utils.js"></script>
+<script src="js/bird.js"></script>
+<!--获取节点-->
+<script src="js/block.js"></script>
+<!---->
+<script>
+     ~(function () {//因为括号里面是个闭包，括号有粘性，使用~号作为分隔符号
+         let wrapBg=document.getElementById("wrapBg"),
+             headTitle=document.getElementById("headTitle"),
+             headBird=document.getElementById("headBird"),
+             grassLand1=document.getElementById("grassLand1"),
+             grassLand2=document.getElementById("grassLand2"),
+             jsScore=document.getElementById("score"),
+             num1=document.getElementById("num1"),
+             num2=document.getElementById("num2"),
+             num3=document.getElementById("num3"),
+             okBtn=document.getElementById("ok"),
+             startBtn=document.getElementById("startBtn"),
+             gameOver=document.getElementById("gameOver");
+         /*小鸟的摆动*/
+         let imgArr = ["images/bird0.png","images/bird1.png"];
+         /*标题的摆动*/
+         let Y=3;
+         let index=0;
+         /*设置定时器*/
+         /*间歇调用与超时调用类似，只不过它会按照指定的时间间隔重复执行代码，直至间歇调用被取消或页面被卸载。设置间歇调用的方法是setInterval()*/
+         let titleTimer=window.setInterval(animate,200);//这样会循环往下掉，技巧，每次循环前，使y为负，则上下摆动
+
+         function animate() {
+             Y*=-1;
+             headTitle.style.top=headTitle.offsetTop+Y+"px";
+             headBird.src=imgArr[index++];
+             if(index==imgArr.length){
+                 index=0;
+             }
+         }
+         /*草坪的滚动*/
+         let landTimer=window.setInterval(landRun,20);//草坪定时器
+
+         /*设置数组，放置管道，添加，移除*/
+         let blockArr=[];
+         let blockDistance=utils.randomNum(130,250);//设置最后管道偏移量
+         //设置初始分数为0,用num1,num2,num3显示
+         let score=0;
+
+         function landRun() {
+             /*两个if判断条件为了让两段草坪同时移动，无缝连接,背景的草坪是静态的，当只有一个的时候，1在移动，背景就是静态，不能无缝连接，需要两段草坪*/
+             if(grassLand1.offsetLeft<-343){
+                 grassLand1.style.left="343px";
+             }
+             if(grassLand2.offsetLeft<-343){
+                 grassLand2.style.left="343px";
+             }
+             grassLand1.style.left =grassLand1.offsetLeft -3+"px";
+             grassLand2.style.left =grassLand2.offsetLeft -3+"px";
+
+         //设置管道移动，添加，移除管道
+             if(blockArr.length>0){
+                 /*设置计分器*/
+                 /*判断小鸟是否通过第一个管道，通过则加分，管道62px,小鸟50px*/
+                 if(blockArr[0].downDivWrap.offsetLeft==-12){
+                     score++;
+                     if(score<10){
+                         num1.style.backgroundImage="url(images/"+score+".jpg)";
+                     }else if(score<100){
+                         num2.style.display="block";
+                         num1.style.backgroundImage="url(images/"+parseInt(score/10)+".jpg)";
+                         num2.style.backgroundImage="url(images/"+score%10+".jpg)";
+                     }else if(score<1000){
+                         num3.style.display="block";
+                         num1.style.backgroundImage="url(images/"+parseInt(score/100)+".jpg)";
+                         num2.style.backgroundImage="url(images/"+parseInt(score/100)%10+".jpg)";
+                         num3.style.backgroundImage="url(images/"+score%10+".jpg)";
+                     }
+                 }
+                 blockArr.forEach((item,index)=>{//es6写法，遍历每个数
+                     item.moveBlock();
+                     /*判断何时结束游戏*/
+                     let x=utils.crash(item.upDivWrap,bird.ele);
+                     let y=utils.crash(item.downDivWrap,bird.ele);
+                     let z=bird.ele.offsetTop>=390;//草地距上423px，减去小鸟28px的高度，423-28=395
+                     if(x||y||z){
+                         /*符合任意一种碰撞就清楚草坪移动定时器，小鸟下降速度设为0，清除点击事件*/
+                         window.clearInterval(landTimer);
+                         bird.fallSpeed=0;
+                         wrapBg.onclick=null;
+                         /*结束界面显示*/
+                         /*关闭计分器界面*/
+                         jsScore.style.display="none";
+                         gameOver.style.display="block";
+                     }
+                     /*下管道碰撞为小鸟的上偏移量大于下管道高度，小于管道的上偏移量*/
+                 })
+
+                 /*使得最后的管道的偏移量小于草坪的偏移量则可以增加管道*/
+                 if(blockArr[blockArr.length-1].downDivWrap.offsetLeft< 450 - blockDistance){
+                     //如果是的就重新设置偏移量，创建新管道
+                     blockDistance=utils.randomNum(130,250);
+                     let newBlock=new Block();
+                     newBlock.createBlock();
+                     blockArr.push(newBlock);
+                     /*显示记分牌*/
+                     num1.style.display="block";
+                     /*移除管道*/
+                     if(blockArr[0].downDivWrap.offsetLeft<-50){
+                         wrapBg.removeChild(blockArr[0].downDivWrap);
+                         wrapBg.removeChild(blockArr[0].upDivWrap);
+                         blockArr.shift(blockArr[0]);
+                     }
+                 }
+                 }
+         }
+     /*开始按钮*/
+         startBtn.onclick=function () {
+             headTitle.style.display="none";//隐藏标题
+             clearInterval(titleTimer);//去除标题设置的定时器
+             this.style.display="none";//开始按钮也要隐藏
+             //引用小鸟对象addbird
+             bird.addBird(wrapBg);//背景下创建小鸟的div
+             bird.flyBird();//小鸟的下降速度的方法
+             bird.wingWave();//小鸟的翅膀摆动方法
+             /*创建引用管道方法*/
+             let b=new Block();
+             b.createBlock();
+             /*将管道存进数组*/
+             blockArr.push(b);
+             wrapBg.onclick=function () {
+                 bird.fallSpeed=-6;//因为速度为正的时候是下降的，只要将速度设置为负值就可以上升
+             }
+         };
+         /*结束按钮*/
+         okBtn.onclick=function () {
+             window.location.href="index.html"
+         }
+
+     })();
+
+
+</script>
+</html>
